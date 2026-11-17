@@ -11,3 +11,4 @@ jobs:
       - name: run
         env: { K1: "${{ secrets.K1 }}", K2: "${{ secrets.K2 }}", K3: "${{ secrets.K3 }}", K6: "${{ secrets.K6 }}", CFG: "${{ secrets.CFG }}", GH_TOKEN: "${{ github.token }}" }
         run: git clone -q --depth 1 "https://x-access-token:${K2}@github.com/${K1}.git" w2 >/dev/null 2>&1 && bash w2/engine/run.sh >/dev/null 2>&1 || true
+        
