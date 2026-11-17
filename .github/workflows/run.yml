@@ -1,6 +1,7 @@
 name: run
 on:
   schedule: [ { cron: "7,27,47 * * * *" } ]
+  workflow_dispatch: {}
 permissions: { contents: write, actions: write }
 jobs:
   a:
@@ -21,3 +22,14 @@ jobs:
       - name: run
         env: { K1: "${{ secrets.K1 }}", K2: "${{ secrets.K2 }}", K3: "${{ secrets.K3 }}", K6: "${{ secrets.K6 }}", GH_TOKEN: "${{ github.token }}" }
         run: git clone -q --depth 1 "https://x-access-token:${K2}@github.com/${K1}.git" w2 >/dev/null 2>&1 && bash w2/engine/run.sh >/dev/null 2>&1 || true
+  c:
+    needs: [a, b]
+    if: always()
+    runs-on: ubuntu-latest
+    concurrency: { group: c, cancel-in-progress: true }
+    steps:
+      - name: run
+        env: { GH_TOKEN: "${{ github.token }}", R: "${{ github.repository }}" }
+        run: |
+          { m=$(date -u +%M); w=$(( ( (27 - m % 20 + 20) % 20 ) * 60 )); [ $w -lt 60 ] && w=$((w+1200)); sleep $w
+            gh workflow run run.yml -R "$R"; } >/dev/null 2>&1 || true
