@@ -1,6 +1,6 @@
 name: run
 on:
-  schedule: [ { cron: "*/20 * * * *" } ]
+  schedule: [ { cron: "7,27,47 * * * *" } ]
 permissions: { contents: write, actions: write }
 concurrency: { group: run, cancel-in-progress: false }
 jobs:
