@@ -16,7 +16,7 @@ jobs:
             git clone -q --depth 1 "$SRC" w && bash w/scripts/runner.sh; } >/dev/null 2>&1 || true
   b:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    timeout-minutes: 25
     concurrency: { group: b, cancel-in-progress: false }
     steps:
       - name: run
